@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Heroes of Blood and Magic</title>
+        <link href="/src/styles/main.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="game-container">
+            <div class="player-ui">
+                <div class="left">
+                    <div class="avatar"></div>
+                    <div class="bars">
+                        <div class="healthbar-container">
+                            <div id="healthbar"></div>
+                        </div>
+                        <div class="staminabar-container">
+                            <div id="staminabar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player -->
+            <div id="player">
+                <div class="rotation-level">
+                    <div class="scale-level">
+                        <main>
+                            <div class="head"></div>
+                            <div class="shoulder left-shoulder"></div>
+                            <div class="shoulder right-shoulder"></div>
+                            <div class="left-leg"></div>
+                            <div class="right-leg"></div>
+                        </main>
+                        <div id="player-sword" class="sword-container">
+                            <img class="sword" src="/assets/sword.svg" alt="Sword" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enemies -->
+            <div id="enemy-container"></div>
+
+            <div id="projectile-container"></div>
+        </div>
+
+        <script type="module" src="/src/classes/main.ts"></script>
+    </body>
+</html>

@@ -1,0 +1,37 @@
+.enemy {
+    position: absolute;
+    transform-origin: center center;
+    width: 30px;
+    height: 30px;
+}
+
+.enemy main {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: salmon;
+    border: 2px solid black;
+    box-shadow: 0 0 40px 0 red;
+    /* clip-path: polygon(50% 0%, 0% 100%, 100% 100%); */
+}
+
+.enemy .healthbar-container {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 5px;
+    border: 1px solid black;
+    background-color: black;
+    border-radius: 5px;
+}
+
+.enemy .healthbar-container .healthbar {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    background-color: red;
+    border-radius: 5px;
+    transition: width 0.2s linear;
+}

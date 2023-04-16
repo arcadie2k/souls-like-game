@@ -1,0 +1,22 @@
+.projectile {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 10px;
+    background-color: #ff9a00;
+    transform-origin: center center;
+    box-shadow: 0 0 20px 0 #ffe808;
+}
+
+/* .projectile::before {
+    content: "";
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    border-radius: 999px;
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffe808;
+    animation: sparks_before 1s linear infinite;
+} */
