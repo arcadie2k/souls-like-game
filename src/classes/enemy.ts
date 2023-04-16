@@ -2,7 +2,7 @@ import { gt, isNil } from "lodash";
 import anime from "animejs/lib/anime.es.js";
 import { Point } from "../types";
 import ProjectileManager from "./projectile";
-import { distanceBetween, toDegrees } from "./utils";
+import { angleBetween, distanceBetween, toDegrees } from "./utils";
 import Player from "./player";
 
 export default class EnemyManager {
@@ -10,6 +10,7 @@ export default class EnemyManager {
     static entityName = "Enemy Manager";
     static enemies: Enemy[] = [];
     static enemyContainer = document.getElementById("enemy-container");
+    static enemyCooldown = 120;
 
     static createEnemy(position: Point) {
         if (isNil(this.enemyContainer)) return;
@@ -22,14 +23,21 @@ export default class EnemyManager {
         this.enemies = this.enemies.filter((enemy) => enemy.id !== enemyId);
     }
 
-    static takeDamage() {
+    static takeDamage(damage: number) {
         this.enemies.forEach((enemy) => {
             const D = distanceBetween(enemy.position, Player.position);
-            if (D <= 200) enemy.takeDamage(20);
+            if (D <= 185) enemy.takeDamage(damage);
         });
     }
 
     static anim() {
+        if(this.enemyCooldown === 0) {
+            this.createEnemy({x: 0, y: 0})
+            this.enemyCooldown = 120
+        }
+        else 
+            this.enemyCooldown -= 1;
+
         this.enemies.forEach((enemy) => {
             enemy.update();
         });
@@ -42,6 +50,8 @@ export class Enemy {
     position: Point;
     elements: {
         enemy: HTMLElement;
+        rotationLevel: HTMLElement;
+        scaleLevel: HTMLElement;
         main: HTMLElement;
         healthbar: HTMLElement;
     };
@@ -61,6 +71,12 @@ export class Enemy {
         enemyDiv.classList.add("enemy");
         enemyDiv.setAttribute("data-enemy-id", String(this.id));
 
+        const rotationLevel = document.createElement("div")
+        rotationLevel.classList.add("rotation-level")
+
+        const scaleLevel = document.createElement("div.scale-level")
+        scaleLevel.classList.add("scale-level")
+
         const main = document.createElement("main");
 
         const healthbarContainer = document.createElement("div");
@@ -70,10 +86,12 @@ export class Enemy {
         healthbar.classList.add("healthbar");
 
         healthbarContainer.appendChild(healthbar);
-        enemyDiv.appendChild(healthbarContainer);
-        enemyDiv.appendChild(main);
+        rotationLevel.appendChild(main);
+        scaleLevel.appendChild(healthbarContainer);
+        scaleLevel.appendChild(rotationLevel)
+        enemyDiv.appendChild(scaleLevel)
 
-        return [enemyDiv, main, healthbar];
+        return [enemyDiv, rotationLevel, scaleLevel, main, healthbar];
     }
 
     getAttackCooldown() {
@@ -87,13 +105,15 @@ export class Enemy {
             x: window.innerWidth / 2 + Math.random() * 1000 - 500,
             y: window.innerHeight / 2 + Math.random() * 1000 - 500,
         };
-        const [enemy, main, healthbar] = this.createDiv();
+        const [enemy, rotationLevel, scaleLevel, main, healthbar] = this.createDiv();
         this.elements = {
             enemy,
+            rotationLevel,
+            scaleLevel,
             main,
             healthbar,
         };
-        console.log(this.elements);
+
         this.stats = {
             level: 1,
             health: 100,
@@ -104,6 +124,11 @@ export class Enemy {
             direction: 0,
             attackCooldown: this.getAttackCooldown(),
         };
+
+        anime({
+            targets: this.elements.scaleLevel,
+            scale: [0, 1],
+        });
     }
 
     // Actions
@@ -112,7 +137,7 @@ export class Enemy {
         this.data.attackCooldown = this.getAttackCooldown();
         let shot = false;
         anime({
-            targets: this.elements.enemy,
+            targets: this.elements.scaleLevel,
             keyframes: [
                 { scale: 1.25, duration: 1000, easing: "spring(1, 80, 10, 0)" },
                 { scale: 1.25, duration: 250 },
@@ -132,7 +157,7 @@ export class Enemy {
         this.stats.dead = true;
         EnemyManager.deleteEnemy(this.id);
         anime({
-            targets: this.elements.enemy,
+            targets: this.elements.scaleLevel,
             scale: [1, 0],
             complete: () => EnemyManager.enemyContainer!.removeChild(this.elements.enemy),
         });
@@ -161,14 +186,8 @@ export class Enemy {
     }
 
     lookToPlayer() {
-        const centerX = this.elements.enemy.offsetLeft + this.elements.enemy.offsetWidth / 2;
-        const centerY = this.elements.enemy.offsetTop + this.elements.enemy.offsetHeight / 2;
-
-        let desiredAngle = toDegrees(
-            Math.atan2(Player.position.y - centerY, Player.position.x - centerX) + Math.PI / 2
-        );
-        this.data.direction = desiredAngle;
-        this.elements.main.style.transform = `rotate(${this.data.direction}deg)`;
+        this.data.direction = angleBetween(this.position, Player.position);
+        this.elements.rotationLevel.style.transform = `rotate(${this.data.direction}rad)`;
     }
 
     updateHealthbar() {

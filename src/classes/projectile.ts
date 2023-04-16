@@ -103,15 +103,11 @@ export class Projectile {
             return;
         }
 
-        if (distanceBetween(this.position, Player.position) <= 50) {
+        if (distanceBetween(this.position, Player.position) <= 35) {
             this.die("hit_player");
             Player.takeDamage(this.size);
             return;
         }
-
-        // Calculate the angle towards player
-        // const desiredAngle = angleBetween(this.position, Player.position);
-        // this.direction += (desiredAngle - this.direction) / 20;
 
         const H = this.stats.moveSpeed * Math.cos(this.direction);
         const V = this.stats.moveSpeed * Math.sin(this.direction);

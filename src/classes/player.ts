@@ -7,11 +7,13 @@ import { toDegrees } from "./utils";
 const Player = {
     id: 1,
     entityName: "Player Object",
-    el: document.getElementById("player"),
-    sword: document.getElementById("player-sword"),
     elements: {
+        player: document.getElementById("player"),
+        sword: document.getElementById("player-sword"),
         healthbar: document.getElementById("healthbar"),
         staminabar: document.getElementById("staminabar"),
+        rotationLevel: document.querySelector("#player .rotation-level") as HTMLElement,
+        scaleLevel: document.querySelector("#player .scale-level") as HTMLElement
     },
 
     // Player properties (hidden) that are used to do some logic
@@ -28,6 +30,7 @@ const Player = {
 
     // Player properties that are modifieable within the game
     stats: {
+        baseDamage: 20,
         moveSpeed: 5,
         rollSpeed: 20,
         rollCooldownDuration: 60,
@@ -36,11 +39,47 @@ const Player = {
         stamina: 100,
         maxStamina: 100,
         staminaRegenTime: 30,
+
+        // Characteristics (max: 32) each
+        vigor: 1,
+        endurance: 1,
+        stength: 1,
+        dexterity: 1,
+        intelligence: 1,
     },
 
     position: {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
+    },
+
+    velocity: {
+       angle: 0,
+       force: 0
+    },
+
+    bounce(angle: number = 0, force: number = 1) {
+        const vx1 = this.velocity.force * Math.sin(this.velocity.angle);
+        const vy1 = -this.velocity.force * Math.cos(this.velocity.angle);
+        const vx2 = force * Math.sin(angle);
+        const vy2 = -force * Math.cos(angle);
+
+        const vxSum = vx1 + vx2;
+        const vySum = vy1 + vy2;
+
+        const forceSum = Math.sqrt(vxSum**2 + vySum**2);
+        const angleSum = Math.atan2(vxSum, -vySum);
+
+        this.velocity = { angle: angleSum, force: forceSum };
+    },
+
+    randomDamage() {
+        let damage = this.stats.baseDamage
+        damage += this.stats.stength * 2
+        damage += Math.pow(this.data.attackCombo, 2)
+        damage += this.stats.dexterity
+        const isCritical = Math.random() < (2 * this.stats.dexterity) / 100
+        return isCritical ? damage * 2 : damage
     },
 
     canRoll() {
@@ -68,29 +107,37 @@ const Player = {
 
         // If exceeds max combo, return to the first attack
         this.data.attackCombo += 1;
-        if (this.data.attackCombo === 3) {
+        if (this.data.attackCombo === 4) {
             this.data.attackCombo = 1;
         }
 
         this.data.attackCooldown = 1;
 
         const attack1 = () => {
-            this.sword!.classList.remove("swing_2");
-            this.sword!.classList.add("swing_1");
+            this.elements.sword!.classList.remove("swing_3");
+            this.elements.sword!.classList.add("swing_1");
+            this.bounce(this.data.angle, 2)
         };
 
         const attack2 = () => {
-            this.sword!.classList.remove("swing_1");
-            this.sword!.classList.add("swing_2");
+            this.elements.sword!.classList.remove("swing_1");
+            this.elements.sword!.classList.add("swing_2");
+            this.bounce(this.data.angle, 4)
         };
 
-        const attackCombos = [attack1, attack2];
+        const attack3 = () => {
+            this.elements.sword!.classList.remove("swing_2");
+            this.elements.sword!.classList.add("swing_3");
+            this.bounce(this.data.angle, 6)
+        };
+
+        const attackCombos = [attack1, attack2, attack3];
 
         attackCombos[this.data.attackCombo - 1]();
         this.consumeStamina(10);
 
         setTimeout(() => {
-            EnemyManager.takeDamage();
+            EnemyManager.takeDamage(this.randomDamage());
         }, 75);
 
         setTimeout(() => {
@@ -100,14 +147,11 @@ const Player = {
 
     takeDamage(amount = 0) {
         this.stats.health = Math.max(0, this.stats.health - amount);
-        // if (this.stats.health === 0) this.die();
-        // else {
-        // }
         anime({
             targets: "#player .scale-level",
             scale: [
                 {
-                    value: 0.8,
+                    value: 0.9,
                     duration: 80,
                     easing: "linear",
                 },
@@ -162,28 +206,41 @@ const Player = {
                 this.data.rollCooldown = this.stats.rollCooldownDuration;
             }
         }
+
+        const vx = this.velocity.force * Math.sin(this.velocity.angle);
+        const vy = - this.velocity.force * Math.cos(this.velocity.angle);
+        
+        const acc= .2
+        
+        this.position.x += vx
+        this.position.y += vy
+
+
+        if(Math.abs(this.velocity.force) < acc) this.velocity.force = 0;
+        if(this.velocity.force > 0) this.velocity.force -= acc
+        if(this.velocity.force < 0) this.velocity.force += acc
+
+        if(!this.velocity.force) this.velocity.angle = 0
     },
 
     lookToCursor() {
-        const centerX = this.el!.offsetLeft + this.el!.offsetWidth / 2;
-        const centerY = this.el!.offsetTop + this.el!.offsetHeight / 2;
-
-        let desiredAngle = toDegrees(Math.atan2(Mouse.y - centerY, Mouse.x - centerX) + Math.PI / 2);
-        this.data.angle = desiredAngle;
-        this.el!.style.transform = `rotate(${this.data.angle}deg)`;
+        this.data.angle = Math.atan2(Mouse.y - this.position.y, Mouse.x - this.position.x) + Math.PI / 2;
+        this.elements.rotationLevel!.style.transform = `rotate(${this.data.angle}rad)`;
     },
 
     updatePosition() {
-        this.el!.style.top = `${this.position.y}px`;
-        this.el!.style.left = `${this.position.x}px`;
+        this.elements.player!.style.top = `${this.position.y}px`;
+        this.elements.player!.style.left = `${this.position.x}px`;
     },
 
     anim() {
-        this.updateStaminabar();
         this.updateHealthbar();
+        this.updateStaminabar();
+
         this.lookToCursor();
-        this.update();
         this.updatePosition();
+
+        this.update();
     },
 
     initListeners() {

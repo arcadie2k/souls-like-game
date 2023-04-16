@@ -9,8 +9,4 @@ const anim = () => {
     requestAnimationFrame(anim);
 };
 
-EnemyManager.createEnemy({ x: 500, y: 500 });
-EnemyManager.createEnemy({ x: 500, y: 500 });
-EnemyManager.createEnemy({ x: 500, y: 500 });
-
 anim();

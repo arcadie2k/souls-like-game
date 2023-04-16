@@ -3,6 +3,17 @@
     transform-origin: center center;
     width: 30px;
     height: 30px;
+    top: auto;
+    left: auto;
+    transform: translate(-50%, -50%);
+}
+
+.enemy .rotation-level, .enemy .scale-level {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
 }
 
 .enemy main {
@@ -12,7 +23,6 @@
     background-color: salmon;
     border: 2px solid black;
     box-shadow: 0 0 40px 0 red;
-    /* clip-path: polygon(50% 0%, 0% 100%, 100% 100%); */
 }
 
 .enemy .healthbar-container {

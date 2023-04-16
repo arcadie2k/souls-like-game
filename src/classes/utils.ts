@@ -17,5 +17,7 @@ export const toDegrees = (rad: number) => {
     return rad * (180 / Math.PI);
 };
 
+export const getUnaryCoef = (x: number) => x > 0 ? 1 : x < 0 ? -1 : 0
+
 export const HALF_SCREEN_WIDTH = innerWidth / 2;
 export const HALF_SCREEN_HEIGHT = innerHeight / 2;
