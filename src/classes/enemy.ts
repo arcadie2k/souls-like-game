@@ -77,6 +77,7 @@ export class Enemy {
         maxHealth: number;
         rankType: RankType;
         combatType: CombatType;
+        XP: number[];
     };
     data: {
         direction: number;
@@ -143,8 +144,9 @@ export class Enemy {
             rankType: "common",
             combatType: "ranged",
             moveSpeed: 2.5,
-            health: 100,
-            maxHealth: 100,
+            health: 50,
+            maxHealth: 50,
+            XP: [10, 20, 30],
         };
         this.data = {
             direction: 0,

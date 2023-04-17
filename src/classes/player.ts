@@ -2,7 +2,13 @@ import EnemyManager from "./enemy";
 import Keys from "./keys";
 import Mouse from "./mouse";
 import anime from "animejs/lib/anime.es.js";
-import { PUSH, UPDATE_HEALTHBAR, UPDATE_POSITION, UPDATE_STAMINABAR, UPDATE_VELOCITY } from "./functions";
+import {
+    PUSH,
+    UPDATE_HEALTHBAR,
+    UPDATE_POSITION,
+    UPDATE_STAMINABAR,
+    UPDATE_VELOCITY,
+} from "./functions";
 
 const Player = {
     id: 1,
@@ -12,8 +18,12 @@ const Player = {
         sword: document.getElementById("player-sword"),
         healthbar: document.getElementById("healthbar"),
         staminabar: document.getElementById("staminabar"),
-        rotationLevel: document.querySelector("#player .rotation-level") as HTMLElement,
-        scaleLevel: document.querySelector("#player .scale-level") as HTMLElement
+        rotationLevel: document.querySelector(
+            "#player .rotation-level"
+        ) as HTMLElement,
+        scaleLevel: document.querySelector(
+            "#player .scale-level"
+        ) as HTMLElement,
     },
 
     // Player properties (hidden) that are used to do some logic
@@ -39,6 +49,7 @@ const Player = {
         stamina: 100,
         maxStamina: 100,
         staminaRegenTime: 30,
+        XP: 0,
 
         // Characteristics (max: 32) each
         vigor: 1,
@@ -54,24 +65,25 @@ const Player = {
     },
 
     velocity: {
-       angle: 0,
-       force: 0
+        angle: 0,
+        force: 0,
     },
 
     randomDamage() {
-        let damage = this.stats.baseDamage
-        damage += this.stats.stength * 2
-        damage += Math.pow(this.data.attackCombo, 2)
-        damage += this.stats.dexterity
-        const isCritical = Math.random() < (2 * this.stats.dexterity) / 100
-        return isCritical ? damage * 2 : damage
+        let damage = this.stats.baseDamage;
+        damage += this.stats.stength * 2;
+        damage += Math.pow(this.data.attackCombo, 2);
+        damage += this.stats.dexterity;
+        const isCritical = Math.random() < (2 * this.stats.dexterity) / 100;
+        return isCritical ? damage * 2 : damage;
     },
 
     canRoll() {
         return (
             this.stats.stamina > 0 &&
             this.data.rollFramesLeft === 0 &&
-            this.data.moveDirection.reduce((t, i) => t + (i !== 0 ? 1 : 0), 0) > 0
+            this.data.moveDirection.reduce((t, i) => t + (i !== 0 ? 1 : 0), 0) >
+                0
         );
     },
 
@@ -101,19 +113,19 @@ const Player = {
         const attack1 = () => {
             this.elements.sword!.classList.remove("swing_3");
             this.elements.sword!.classList.add("swing_1");
-            PUSH(this, this.data.angle, 2)
+            PUSH(this, this.data.angle, 2);
         };
 
         const attack2 = () => {
             this.elements.sword!.classList.remove("swing_1");
             this.elements.sword!.classList.add("swing_2");
-            PUSH(this, this.data.angle, 4)
+            PUSH(this, this.data.angle, 4);
         };
 
         const attack3 = () => {
             this.elements.sword!.classList.remove("swing_2");
             this.elements.sword!.classList.add("swing_3");
-            PUSH(this, this.data.angle, 6)
+            PUSH(this, this.data.angle, 6);
         };
 
         const attackCombos = [attack1, attack2, attack3];
@@ -155,11 +167,15 @@ const Player = {
     },
 
     updateHealthbar() {
-        this.elements.healthbar!.style.width = `${(this.stats.health / this.stats.maxHealth) * 100}%`;
+        this.elements.healthbar!.style.width = `${
+            (this.stats.health / this.stats.maxHealth) * 100
+        }%`;
     },
 
     updateStaminabar() {
-        this.elements.staminabar!.style.width = `${(this.stats.stamina / this.stats.maxStamina) * 100}%`;
+        this.elements.staminabar!.style.width = `${
+            (this.stats.stamina / this.stats.maxStamina) * 100
+        }%`;
     },
 
     update() {
@@ -167,7 +183,10 @@ const Player = {
         if (!Keys.a && !Keys.d) this.data.moveDirection[0] = 0;
 
         if (this.data.staminaRegen === 0) {
-            this.stats.stamina = Math.min(this.stats.maxStamina, this.stats.stamina + 0.5);
+            this.stats.stamina = Math.min(
+                this.stats.maxStamina,
+                this.stats.stamina + 0.5
+            );
         } else {
             this.data.staminaRegen = Math.max(0, this.data.staminaRegen - 1);
         }
@@ -175,35 +194,44 @@ const Player = {
         // If not rolling
         if (this.data.rollFramesLeft === 0) {
             // Move
-            this.position.x += this.stats.moveSpeed * this.data.moveDirection[0];
-            this.position.y -= this.stats.moveSpeed * this.data.moveDirection[1];
+            this.position.x +=
+                this.stats.moveSpeed * this.data.moveDirection[0];
+            this.position.y -=
+                this.stats.moveSpeed * this.data.moveDirection[1];
 
             // Roll
             if (Keys[" "]) {
                 this.roll();
             }
         } else {
-            this.position.x += this.stats.rollSpeed * this.data.rollDirection[0];
-            this.position.y -= this.stats.rollSpeed * this.data.rollDirection[1];
-            this.data.rollFramesLeft = Math.max(0, this.data.rollFramesLeft - 1);
+            this.position.x +=
+                this.stats.rollSpeed * this.data.rollDirection[0];
+            this.position.y -=
+                this.stats.rollSpeed * this.data.rollDirection[1];
+            this.data.rollFramesLeft = Math.max(
+                0,
+                this.data.rollFramesLeft - 1
+            );
 
             if (this.data.rollFramesLeft === 0) {
                 this.data.rollCooldown = this.stats.rollCooldownDuration;
             }
         }
 
-        UPDATE_VELOCITY(this)
+        UPDATE_VELOCITY(this);
     },
 
     lookToCursor() {
-        this.data.angle = Math.atan2(Mouse.y - this.position.y, Mouse.x - this.position.x) + Math.PI / 2;
+        this.data.angle =
+            Math.atan2(Mouse.y - this.position.y, Mouse.x - this.position.x) +
+            Math.PI / 2;
         this.elements.rotationLevel!.style.transform = `rotate(${this.data.angle}rad)`;
     },
 
     anim() {
         UPDATE_HEALTHBAR(this);
         UPDATE_STAMINABAR(this);
-        UPDATE_POSITION(this, this.elements.player)
+        UPDATE_POSITION(this, this.elements.player);
 
         this.lookToCursor();
         this.update();

@@ -1,6 +1,7 @@
 @import "./player.css";
 @import "./enemy.css";
 @import "./projectile.css";
+@import "./damage.css";
 
 * {
     margin: 0;

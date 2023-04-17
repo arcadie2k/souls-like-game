@@ -1,5 +1,6 @@
 import { Point } from "../types";
 import { isNil } from "lodash";
+import anime from "animejs/lib/anime.es.js";
 import { UPDATE_POSITION } from "./functions";
 
 type DamageIndicatorType = {
@@ -42,10 +43,11 @@ class Damage {
     elements: {
         damage: HTMLElement;
     };
+    framesLeft: number;
 
     createDiv() {
         const damageDiv = document.createElement("div");
-        damageDiv.classList.add(".damage");
+        damageDiv.classList.add("damage");
         damageDiv.setAttribute("data-damage", String(this.damage));
         damageDiv.setAttribute("data-is-critical", String(this.critical));
         return damageDiv;
@@ -57,17 +59,31 @@ class Damage {
         critical: boolean = false
     ) {
         this.id = DamageIndicator.nextId++;
-        this.position = { ...position };
+        this.position = { x: position.x, y: position.y - 20 };
         this.damage = damage;
         this.critical = critical;
         this.elements = {
             damage: this.createDiv(),
         };
+        this.framesLeft = 60;
     }
 
     update() {
-        this.position.y -= 0.1;
+        this.position.y -= 1;
         UPDATE_POSITION(this, this.elements.damage);
+
+        if (this.framesLeft > 0) this.framesLeft -= 1;
+        else {
+            DamageIndicator.deleteDamage(this.id);
+            anime({
+                targets: this.elements.damage,
+                opacity: [1, 0],
+                complete: () =>
+                    DamageIndicator.damageContainer!.removeChild(
+                        this.elements.damage
+                    ),
+            });
+        }
     }
 }
 
