@@ -2,7 +2,7 @@ import EnemyManager from "./enemy";
 import Keys from "./keys";
 import Mouse from "./mouse";
 import anime from "animejs/lib/anime.es.js";
-import { toDegrees } from "./utils";
+import { PUSH, UPDATE_HEALTHBAR, UPDATE_POSITION, UPDATE_STAMINABAR, UPDATE_VELOCITY } from "./functions";
 
 const Player = {
     id: 1,
@@ -58,21 +58,6 @@ const Player = {
        force: 0
     },
 
-    bounce(angle: number = 0, force: number = 1) {
-        const vx1 = this.velocity.force * Math.sin(this.velocity.angle);
-        const vy1 = -this.velocity.force * Math.cos(this.velocity.angle);
-        const vx2 = force * Math.sin(angle);
-        const vy2 = -force * Math.cos(angle);
-
-        const vxSum = vx1 + vx2;
-        const vySum = vy1 + vy2;
-
-        const forceSum = Math.sqrt(vxSum**2 + vySum**2);
-        const angleSum = Math.atan2(vxSum, -vySum);
-
-        this.velocity = { angle: angleSum, force: forceSum };
-    },
-
     randomDamage() {
         let damage = this.stats.baseDamage
         damage += this.stats.stength * 2
@@ -116,19 +101,19 @@ const Player = {
         const attack1 = () => {
             this.elements.sword!.classList.remove("swing_3");
             this.elements.sword!.classList.add("swing_1");
-            this.bounce(this.data.angle, 2)
+            PUSH(this, this.data.angle, 2)
         };
 
         const attack2 = () => {
             this.elements.sword!.classList.remove("swing_1");
             this.elements.sword!.classList.add("swing_2");
-            this.bounce(this.data.angle, 4)
+            PUSH(this, this.data.angle, 4)
         };
 
         const attack3 = () => {
             this.elements.sword!.classList.remove("swing_2");
             this.elements.sword!.classList.add("swing_3");
-            this.bounce(this.data.angle, 6)
+            PUSH(this, this.data.angle, 6)
         };
 
         const attackCombos = [attack1, attack2, attack3];
@@ -207,20 +192,7 @@ const Player = {
             }
         }
 
-        const vx = this.velocity.force * Math.sin(this.velocity.angle);
-        const vy = - this.velocity.force * Math.cos(this.velocity.angle);
-        
-        const acc= .2
-        
-        this.position.x += vx
-        this.position.y += vy
-
-
-        if(Math.abs(this.velocity.force) < acc) this.velocity.force = 0;
-        if(this.velocity.force > 0) this.velocity.force -= acc
-        if(this.velocity.force < 0) this.velocity.force += acc
-
-        if(!this.velocity.force) this.velocity.angle = 0
+        UPDATE_VELOCITY(this)
     },
 
     lookToCursor() {
@@ -228,18 +200,12 @@ const Player = {
         this.elements.rotationLevel!.style.transform = `rotate(${this.data.angle}rad)`;
     },
 
-    updatePosition() {
-        this.elements.player!.style.top = `${this.position.y}px`;
-        this.elements.player!.style.left = `${this.position.x}px`;
-    },
-
     anim() {
-        this.updateHealthbar();
-        this.updateStaminabar();
+        UPDATE_HEALTHBAR(this);
+        UPDATE_STAMINABAR(this);
+        UPDATE_POSITION(this, this.elements.player)
 
         this.lookToCursor();
-        this.updatePosition();
-
         this.update();
     },
 

@@ -1,0 +1,12 @@
+.damage {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    width: 100px;
+    height: 100px;
+    background-color: red;
+}
+
+.damage::before {
+    content: attr(data-damage);
+}

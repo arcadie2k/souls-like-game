@@ -3,6 +3,7 @@ import anime from "animejs/lib/anime.es.js";
 import { Point } from "../types";
 import { distanceBetween, angleBetween } from "./utils";
 import Player from "./player";
+import { UPDATE_POSITION } from "./functions";
 
 export default class ProjectileManager {
     static nextId = 1;
@@ -60,8 +61,8 @@ export class Projectile {
             projectile: this.createDiv(),
         };
         this.stats = {
-            moveSpeed: 5,
-            life: 512,
+            moveSpeed: 10,
+            life: 80,
         };
     }
 
@@ -90,11 +91,6 @@ export class Projectile {
         }
     }
 
-    updatePosition() {
-        this.elements.projectile.style.top = `${this.position.y}px`;
-        this.elements.projectile.style.left = `${this.position.x}px`;
-    }
-
     update() {
         this.stats.life -= 1;
 
@@ -115,6 +111,6 @@ export class Projectile {
         this.position.x -= H;
         this.position.y -= V;
 
-        this.updatePosition();
+        UPDATE_POSITION(this, this.elements.projectile)
     }
 }
